@@ -1,0 +1,3 @@
+COMPONENT=RadioSenseToLedsAppC
+include $(MAKERULES)
+
