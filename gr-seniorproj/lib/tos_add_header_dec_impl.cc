@@ -76,17 +76,19 @@ namespace gr {
 
       // Append header to the payload
       for (int i = 0; i < noutput_items; i += packet_size){
-        out[i] = (char) (d_dest_addr >> 2);
-        out[i+1] = (char) d_dest_addr;
-        out[i+2] = (char) (d_src_addr >> 2);
-        out[i+3] = (char) d_msg_len;
-        out[i+4] = (char) d_grp_id;
-        out[i+5] = (char) d_am_handler_type;
+        out[i] = 0x00;
+        out[i+1] = (char) (d_dest_addr >> 2);
+        out[i+2] = (char) d_dest_addr;
+        out[i+3] = (char) (d_src_addr >> 2);
+        out[i+4] = (char) d_src_addr;
+        out[i+5] = (char) d_msg_len;
+        out[i+6] = (char) d_grp_id;
+        out[i+7] = (char) d_am_handler_type;
 
         int in_i = i/packet_size;
         for (int j = 0; j < d_msg_len; j++)
         {
-          out[i+j] = in[in_i+j];
+          out[i+8+j] = in[in_i+j];
         }
  
         // Consume message length's worth of input
