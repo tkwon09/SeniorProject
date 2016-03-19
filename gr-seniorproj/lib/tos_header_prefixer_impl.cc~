@@ -1,0 +1,132 @@
+/* -*- c++ -*- */
+/* 
+ * Copyright 2016 <+YOU OR YOUR COMPANY+>.
+ * 
+ * This is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3, or (at your option)
+ * any later version.
+ * 
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this software; see the file COPYING.  If not, write to
+ * the Free Software Foundation, Inc., 51 Franklin Street,
+ * Boston, MA 02110-1301, USA.
+ */
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include <gnuradio/io_signature.h>
+#include "tos_header_prefixer_impl.h"
+#include <stdio.h>
+#include <assert.h>
+
+namespace gr {
+  namespace seniorproj {
+
+    tos_header_prefixer::sptr
+    tos_header_prefixer::make(int dest_addr, int src_addr, int msg_len, int grp_id, int am_handler_type)
+    {
+      // enforce max payload length of 28 bytes
+      assert(msg_len < 29);
+      return gnuradio::get_initial_sptr
+        (new tos_header_prefixer_impl(dest_addr, src_addr, msg_len, grp_id, am_handler_type));
+    }
+
+    /*
+     * The private constructor
+     *     Need the size of input to scale with payload length
+     *     Output is 1 byte. Need to buffer output.
+     */
+    tos_header_prefixer_impl::tos_header_prefixer_impl(int dest_addr, int src_addr, int msg_len, int grp_id, int am_handler_type)
+      : gr::block("tos_header_prefixer",
+              gr::io_signature::make(1, 1, sizeof(char) * msg_len),
+              gr::io_signature::make(1, 1, sizeof(char)))
+    {
+      // Make sure output is a multiple of packet size
+      set_output_multiple(msg_len + 8);
+      // Prefill buffer with header information inside constructor because it doesn't change.
+      buf[0] = 0x00;
+      buf[1] = (char) (dest_addr >> 2);
+      buf[2] = (char) dest_addr;
+      buf[3] = (char) (src_addr >> 2);
+      buf[4] = (char) src_addr;
+      buf[5] = (char) msg_len;
+      buf[6] = (char) grp_id;
+      buf[7] = (char) am_handler_type;
+      index = 0;
+      d_msg_len = msg_len;
+    }
+
+    /*
+     * Our virtual destructor.
+     */
+    tos_header_prefixer_impl::~tos_header_prefixer_impl()
+    {
+    }
+
+    void
+    tos_header_prefixer_impl::forecast (int noutput_items, gr_vector_int &ninput_items_required)
+    {
+      // Number of packets is number of raw bytes divided by number of bytes per packet
+      // Number of outputs is number of bytes per packet times number of packets
+      int packet_size = d_msg_len + 8;
+      int input_required =  packet_size * (int) ((float) noutput_items / (float) packet_size);
+      unsigned ninputs = ninput_items_required.size();
+      for(unsigned i = 0; i < ninputs; i++)
+        ninput_items_required[i] = input_required;
+      fprintf(stdout, "Forecast for packet size %d wants %d needs %d\n", packet_size, noutput_items, input_required);
+      fprintf(stdout, "  %d packets\n", input_required / packet_size);
+    }
+
+    int
+    tos_header_prefixer_impl::general_work (int noutput_items,
+                       gr_vector_int &ninput_items,
+                       gr_vector_const_void_star &input_items,
+                       gr_vector_void_star &output_items)
+    {
+      const char *in = (const char *) input_items[0];
+      char *out = (char *) output_items[0];
+      
+      fprintf(stdout, "  general work got %d items\n", noutput_items);
+
+      // If we are still outputting bytes from an older packet,
+      // increment our index and send the next byte.
+      if (index < d_msg_len + 8)
+      {
+        out[0] = buf[index++];
+      }
+      // Otherwise, read msg_len bytes and set up the next packet
+      else
+      {
+        // Copy payload into buffer
+        memcpy(buf+8, in, d_msg_len);
+        //for (int i = 0; i < msg_len; i++)
+        //{
+        //  buf[i+8] = in[i];
+        //}
+        out[0] = buf[0];
+        index = 1;
+
+        // Consumed a new packet
+        consume_each(d_msg_len);
+      }
+
+      // Tell runtime system how many input items we consumed on
+      // each input stream.
+      // consume_each (noutput_items);
+
+      // Tell runtime system how many output items we produced.
+      fprintf(stdout, "%i\n", noutput_items);
+      return noutput_items;
+    }
+
+  } /* namespace seniorproj */
+} /* namespace gr */
+

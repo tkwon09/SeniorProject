@@ -1,0 +1,30 @@
+INCLUDE(FindPkgConfig)
+PKG_CHECK_MODULES(PC_SENIORPROJ seniorproj)
+
+FIND_PATH(
+    SENIORPROJ_INCLUDE_DIRS
+    NAMES seniorproj/api.h
+    HINTS $ENV{SENIORPROJ_DIR}/include
+        ${PC_SENIORPROJ_INCLUDEDIR}
+    PATHS ${CMAKE_INSTALL_PREFIX}/include
+          /usr/local/include
+          /usr/include
+)
+
+FIND_LIBRARY(
+    SENIORPROJ_LIBRARIES
+    NAMES gnuradio-seniorproj
+    HINTS $ENV{SENIORPROJ_DIR}/lib
+        ${PC_SENIORPROJ_LIBDIR}
+    PATHS ${CMAKE_INSTALL_PREFIX}/lib
+          ${CMAKE_INSTALL_PREFIX}/lib64
+          /usr/local/lib
+          /usr/local/lib64
+          /usr/lib
+          /usr/lib64
+)
+
+INCLUDE(FindPackageHandleStandardArgs)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(SENIORPROJ DEFAULT_MSG SENIORPROJ_LIBRARIES SENIORPROJ_INCLUDE_DIRS)
+MARK_AS_ADVANCED(SENIORPROJ_LIBRARIES SENIORPROJ_INCLUDE_DIRS)
+

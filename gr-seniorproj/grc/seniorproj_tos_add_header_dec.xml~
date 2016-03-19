@@ -1,0 +1,66 @@
+<?xml version="1.0"?>
+<block>
+  <name>tos_add_header_dec</name>
+  <key>seniorproj_tos_add_header_dec</key>
+  <category>seniorproj</category>
+  <import>import seniorproj</import>
+  <make>seniorproj.tos_add_header_dec($dest_addr, $src_addr, $msg_len, $grp_id, $am_handler_type)</make>
+  <!-- Make one 'param' node for every Parameter you want settable from the GUI.
+       Sub-nodes:
+       * name
+       * key (makes the value accessible as $keyname, e.g. in the make node)
+       * type -->
+  <param>
+    <name>Destination Address</name>
+    <key>dest_addr</key>
+    <value>65535</value>
+    <type>int</type>
+  </param>
+  <param>
+    <name>Link Source Address</name>
+    <key>src_addr</key>
+    <value>1</value>
+    <type>int</type>
+  </param>
+  <param>
+    <name>Message Length</name>
+    <key>msg_len</key>
+    <value>1</value>
+    <type>int</type>
+  </param>
+  <param>
+    <name>Group ID</name>
+    <key>grp_id</key>
+    <value>34</value>
+    <type>int</type>
+  </param>
+  <param>
+    <name>Active Message Handler Type</name>
+    <key>am_handler_type</key>
+    <value>26</value>
+    <type>int</type>
+  </param>
+
+  <!-- Make one 'sink' node per input. Sub-nodes:
+       * name (an identifier for the GUI)
+       * type
+       * vlen
+       * optional (set to 1 for optional inputs) -->
+  <sink>
+    <name>in</name>
+    <type>byte</type>
+    <vlen>$msg_len</vlen>
+    <!-- e.g. int, float, complex, byte, short, xxx_vector, ...-->
+  </sink>
+
+  <!-- Make one 'source' node per output. Sub-nodes:
+       * name (an identifier for the GUI)
+       * type
+       * vlen
+       * optional (set to 1 for optional inputs) -->
+  <source>
+    <name>out</name>
+    <type>byte</type>
+    <!-- e.g. int, float, complex, byte, short, xxx_vector, ...-->
+  </source>
+</block>

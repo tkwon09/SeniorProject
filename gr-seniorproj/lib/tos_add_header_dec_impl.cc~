@@ -1,0 +1,104 @@
+/* -*- c++ -*- */
+/* 
+ * Copyright 2016 <+YOU OR YOUR COMPANY+>.
+ * 
+ * This is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3, or (at your option)
+ * any later version.
+ * 
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this software; see the file COPYING.  If not, write to
+ * the Free Software Foundation, Inc., 51 Franklin Street,
+ * Boston, MA 02110-1301, USA.
+ */
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include <gnuradio/io_signature.h>
+#include "tos_add_header_dec_impl.h"
+
+#include <stdio.h>
+#include <assert.h>
+
+namespace gr {
+  namespace seniorproj {
+
+    tos_add_header_dec::sptr
+    tos_add_header_dec::make(int dest_addr, int src_addr, int msg_len, int grp_id, int am_handler_type)
+    {
+      return gnuradio::get_initial_sptr
+        (new tos_add_header_dec_impl(dest_addr, src_addr, msg_len, grp_id, am_handler_type));
+    }
+
+    /*
+     * The private constructor
+     */
+    tos_add_header_dec_impl::tos_add_header_dec_impl(int dest_addr, int src_addr, int msg_len, int grp_id, int am_handler_type)
+      : gr::sync_interpolator("tos_add_header_dec",
+              gr::io_signature::make(1, 1, sizeof(char) * msg_len),
+              gr::io_signature::make(1, 1, sizeof(char)), msg_len + 8)
+    {
+      d_dest_addr = dest_addr;
+      d_src_addr = src_addr;
+      d_msg_len = msg_len;
+      d_grp_id = grp_id;
+      d_am_handler_type = am_handler_type;
+      
+      packet_size = msg_len + 8;
+    }
+
+    /*
+     * Our virtual destructor.
+     */
+    tos_add_header_dec_impl::~tos_add_header_dec_impl()
+    {
+    }
+
+    int
+    tos_add_header_dec_impl::work(int noutput_items,
+        gr_vector_const_void_star &input_items,
+        gr_vector_void_star &output_items)
+    {
+      const char *in = (const char *) input_items[0];
+      char *out = (char *) output_items[0];
+
+      assert(noutput_items % packet_size == 0);
+      if (noutput_items % packet_size != 0)
+        fprintf(stdout, "EXPECTED OUTPUT AS MULTIPLE OF %d, GOT %d", packet_size, noutput_items);
+
+      // Append header to the payload
+      for (int i = 0; i < noutput_items; i += packet_size){
+        out[i] = (char) (d_dest_addr >> 2);
+        out[i+1] = (char) d_dest_addr;
+        out[i+2] = (char) (d_src_addr >> 2);
+        out[i+3] = (char) d_msg_len;
+        out[i+4] = (char) d_grp_id;
+        out[i+5] = (char) d_am_handler_type;
+
+        int in_i = i/packet_size;
+        for (int j = 0; j < d_msg_len; j++)
+        {
+          out[i+j] = in[in_i+j];
+        }
+ 
+        // Consume message length's worth of input
+        consume_each(d_msg_len);
+      }
+
+      
+
+      // Tell runtime system how many output items we produced.
+      return noutput_items;
+    }
+
+  } /* namespace seniorproj */
+} /* namespace gr */
+

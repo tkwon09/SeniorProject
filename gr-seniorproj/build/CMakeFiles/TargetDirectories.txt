@@ -1,0 +1,12 @@
+/home/ted/gr-seniorproj/build/swig/CMakeFiles/_seniorproj_swig.dir
+/home/ted/gr-seniorproj/build/swig/CMakeFiles/_seniorproj_swig_doc_tag.dir
+/home/ted/gr-seniorproj/build/swig/CMakeFiles/_seniorproj_swig_swig_tag.dir
+/home/ted/gr-seniorproj/build/docs/doxygen/CMakeFiles/doxygen_target.dir
+/home/ted/gr-seniorproj/build/lib/CMakeFiles/gnuradio-seniorproj.dir
+/home/ted/gr-seniorproj/build/apps/CMakeFiles/pygen_apps_9a6dd.dir
+/home/ted/gr-seniorproj/build/python/CMakeFiles/pygen_python_42c00.dir
+/home/ted/gr-seniorproj/build/swig/CMakeFiles/pygen_swig_28c8b.dir
+/home/ted/gr-seniorproj/build/swig/CMakeFiles/seniorproj_swig_swig_2d0df.dir
+/home/ted/gr-seniorproj/build/swig/CMakeFiles/seniorproj_swig_swig_doc.dir
+/home/ted/gr-seniorproj/build/lib/CMakeFiles/test-seniorproj.dir
+/home/ted/gr-seniorproj/build/CMakeFiles/uninstall.dir

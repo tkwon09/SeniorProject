@@ -1,0 +1,13 @@
+#ifndef USRPTEST_H
+#define USRPTEST_H
+
+enum {
+  AM_USRPTEST = 26,
+  TIMER_PERIOD_MILLI = 250
+};
+
+typedef nx_struct USRPTestMsg {
+  nx_uint8_t counter;
+} USRPTestMsg;
+
+#endif

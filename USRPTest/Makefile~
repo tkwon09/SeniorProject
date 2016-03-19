@@ -1,0 +1,3 @@
+COMPONENT=USRPTransmitAppC
+#USRPReceiveAppC, USRPTransmitAppC
+include $(MAKERULES)
